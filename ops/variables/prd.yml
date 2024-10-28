@@ -1,0 +1,14 @@
+---
+api:
+  replicas: 1
+app:
+  replicas: 1
+  domain: api.prd.rovbots.com
+  configmap:
+    is_production: "true"
+    env: "prd"
+    port: "8000"
+info:
+  owner: Somykoron
+  contact: support@somykoron.com
+  project: rovbots

@@ -1,0 +1,34 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rovbots/websock:$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION)
+       # Install Jinja2 and Checkov
+      - echo Installing Jinja2 and Checkov...
+      - rm -f .python-version
+      - apt-get update && apt-get install -y python3-pip
+      - pip3 install jinja2-cli checkov
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $IMAGE_URI .
+      - docker push $IMAGE_URI
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo IMAGE_URI=$IMAGE_URI
+      - echo Replacing IMAGE_URI in deployments.yml...
+      # Run the generate-manifests.sh script to generate the manifest
+      - echo Running generate-manifests.sh...
+      - chmod +x ops/build/generate-manifests.sh
+      - ./ops/build/generate-manifests.sh
+      - echo Configuring access to EKS cluster...
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name rovbots-prd
+      #  Run the kubernetes-deploy.sh script to apply changes
+      - echo Running kubernetes-deploy.sh...
+      - chmod +x ops/build/kubernetes-deploy.sh
+      - ./ops/build/kubernetes-deploy.sh

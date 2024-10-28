@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ CI_PROJECT_NAME }}-websock"
+  namespace: "{{ CI_PROJECT_NAME }}-{{ CI_ENVIRONMENT_SLUG }}"
+spec:
+  replicas: {{ api.replicas }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+        app: "{{ CI_PROJECT_NAME }}-websock"
+        tier: websock
+  template:
+    metadata:
+      labels:
+        app: "{{ CI_PROJECT_NAME }}-websock"
+        tier: websock
+    spec:
+      containers:
+      - name: "{{ CI_PROJECT_NAME }}-websock"
+        image: "{{ IMAGE_URI }}"
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: dotenv-cfm.{{ CI_PROJECT_NAME }}-web
+        ports:
+        - name: http
+          containerPort: {{ app.configmap.port }}

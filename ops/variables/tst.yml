@@ -1,0 +1,14 @@
+---
+api:
+  replicas: 1
+app:
+  replicas: 1
+  domain: api.stage.rovbots.com
+  configmap:
+    is_production: "false"
+    env: "prd"
+    port: "3000"
+info:
+  owner: Somykoron
+  contact: support@somykoron.com
+  project: rovbots
