@@ -32,3 +32,6 @@ phases:
       - echo Running kubernetes-deploy.sh...
       - chmod +x ops/build/kubernetes-deploy.sh
       - ./ops/build/kubernetes-deploy.sh
+artifacts:
+  files:
+    - ops/manifests/.generated/deployment.yml
